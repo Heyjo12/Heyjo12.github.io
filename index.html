@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+		let data = [];
+
+		function startDownload(){
+			const a = document.createElement("a");
+		  	const file = new Blob([JSON.stringify(data)], {type: "text/plain"});
+		  	a.href = URL.createObjectURL(file);
+		  	a.download = document.getElementById("search").value + "_search_results.json"
+		  	a.click();
+		}
+
+        async function startSearch(){
+			if(document.getElementById("apikey").value === ""){
+				alert("Vložte prosím API klíč!");
+				return "Vložte prosím API klíč!";
+			}
+			if(document.getElementById("search").value === ""){
+				alert("Zadejte prosím slovo k vyhledání.");
+				return "Zadejte prosím slovo k vyhledání.";
+			}
+			const url = "https://www.googleapis.com/customsearch/v1?key=" + document.getElementById("apikey").value + "&cx=e114090c8ff6c427b&q=" + document.getElementById("search").value
+            try {
+	            const response = await fetch(url).then(x => x.text());
+	            const result = JSON.parse(response);
+				data = result.items.map((x) => x);
+				result.items.forEach(item => {
+					document.getElementById("content").append(
+          				document.createElement("br"),
+          				document.createTextNode(item.title),
+						document.createElement("br"),
+						document.createTextNode(item.link),
+						document.createElement("br")
+					);
+				})
+				document.getElementById("downloadbtn").disabled = false;
+				return data;
+            } catch (error) {
+	            console.error(error);
+            };
+        };
+    </script>
+</head>
+<body>
+<h1>Zadejte slovo k vyhledání na google</h1>
+<form>
+    <br>
+	<input type="text" id="apikey" placeholder="Vložte api klíč" value="">
+	<br>
+	<br>	
+    <input type="text" id="search" placeholder="Vyhledat na google..." value="">
+    <input type="button" onclick=startSearch() value="Vyhledat">
+	<input type="button" id="downloadbtn" onclick=startDownload() value="Stáhnout" disabled="true">
+</form>
+<div id="content"></div>
+</body>
+</html> 
